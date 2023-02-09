@@ -11,4 +11,9 @@ LAUNCH SCREEN
 
 HOME PAGE
 
-![HomePage](https://user-images.githubusercontent.com/97442384/217388852-0e13cf79-d158-4bee-806f-aa7311ad0fa4.png)
+![HomePage](https://user-images.githubusercontent.com/97442384/217842795-10e3e1e8-0063-43da-a92f-275946a7d0ec.png)
+
+PUBLIC API RECORD
+
+https://user-images.githubusercontent.com/97442384/217842399-0e127bb8-8d6a-4391-ac3b-879670e34d47.mov
+
