@@ -20,7 +20,7 @@ class ViewController: UIViewController,UISearchBarDelegate {
     let imageView : UIImageView = {
         let iv = UIImageView()
         iv.image = UIImage(named:"image3")
-        iv.contentMode = .scaleAspectFill
+        iv.contentMode = .scaleToFill
         return iv
     }()
     
@@ -36,11 +36,17 @@ class ViewController: UIViewController,UISearchBarDelegate {
         return s
     }()
     
+    let searchController = UISearchController(searchResultsController: nil)
+
     
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        navigationItem.searchController = searchController
+        navigationItem.hidesSearchBarWhenScrolling = false
+        searchController.searchBar.delegate = self
+        
         
         collection.dataSource = self
         collection.delegate = self
@@ -58,19 +64,29 @@ class ViewController: UIViewController,UISearchBarDelegate {
     
     //    MARK: SEARCH BAR DELEGATE
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        
         if searchText == "" {
             getData()
-        }else {
+        }else{
             listViewModel = listViewModel.filter({
-                    return $0.api.lowercased().contains(searchText.lowercased())
-                })
+                return $0.api.lowercased().contains(searchBar.text!.lowercased())
+            })
         }
+        
+
+    }
+    func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
+        searchBar.setShowsCancelButton(true, animated: true)
+    }
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        searchBar.resignFirstResponder()
+        searchBar.setShowsCancelButton(false, animated: true)
+    }
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         collection.reloadData()
     }
     
     
-//    MARK: - GET DATA
+    //    MARK: - GET DATA
     func getData(){
         viewModel.fetchAPI { api in
             if let api = api {
