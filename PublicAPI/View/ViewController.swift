@@ -130,7 +130,7 @@ extension ViewController: UICollectionViewDelegate,UICollectionViewDataSource {
         let cell = collection.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath) as! CollectionViewCell
         let apiViewModel = listViewModel[indexPath.item]
         cell.apiLabel.text = "API: " + apiViewModel.api
-        cell.linkLabel.text = "Link: " + apiViewModel.link
+        cell.linkLabel.text = apiViewModel.link
         cell.descriptionLabel.text = "Description: " + apiViewModel.description
         cell.isHttpsLabel.text = "isHTTPS: " + String(apiViewModel.isHttps)
         
