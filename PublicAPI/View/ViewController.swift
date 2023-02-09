@@ -27,12 +27,12 @@ class ViewController: UIViewController,UISearchBarDelegate {
 // MARK: SEARCH BAR
     lazy var searchBar : UISearchBar = {
         let s = UISearchBar()
-            s.placeholder = "Search Timeline"
+            s.placeholder = "Search APIs"
             s.delegate = self
-            s.tintColor = .white
+        s.searchBarStyle = .prominent
         s.barTintColor = .white
-            s.barStyle = .default
-            s.sizeToFit()
+        s.barStyle = .default
+        s.sizeToFit()
         return s
     }()
     
@@ -42,23 +42,11 @@ class ViewController: UIViewController,UISearchBarDelegate {
         super.viewDidLoad()
 
         
-        searchBar.delegate = self
-//        Search bar'ı her zaman görünür yap.
-        navigationItem.hidesSearchBarWhenScrolling = false
         collection.dataSource = self
         collection.delegate = self
         collection.backgroundView = imageView
-//    MARK: GET APIs
-        viewModel.fetchAPI { api in
-            if let api = api {
-                self.listViewModel = api.entries.map({ViewListModel(apis: $0)})
-                
-                DispatchQueue.main.async {
-                    self.collection.reloadData()
-                   
-                }
-            }
-        }
+
+        getData()
         
         let nib = UINib(nibName: "CollectionViewCell", bundle: nil)
         collection.register(nib, forCellWithReuseIdentifier: "cell")
@@ -68,33 +56,35 @@ class ViewController: UIViewController,UISearchBarDelegate {
         collection.addSubview(refreshControl)
     }
     
-    
-//    MARK: SEARCH BAR DELEGATE
+    //    MARK: SEARCH BAR DELEGATE
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-
-        searchBar.resignFirstResponder()
         
-        if searchText.isEmpty {
-            viewModel.fetchAPI { api in
-                if let api = api {
-                    self.listViewModel = (api.entries.map({ViewListModel(apis: $0)}))
-                    DispatchQueue.main.async {
-                        self.collection.reloadData()
-                    }
-                }
-               
-            }
+        if searchText == "" {
+            getData()
         }else {
             listViewModel = listViewModel.filter({
-                    return $0.api.lowercased().contains(searchText.lowercased()) ||
-                        $0.link.lowercased().contains(searchText.lowercased()) ||
-                        $0.description.lowercased().contains(searchText.lowercased())
+                    return $0.api.lowercased().contains(searchText.lowercased())
                 })
         }
         collection.reloadData()
     }
     
-//    MARK: REFRESH DATA
+    
+//    MARK: - GET DATA
+    func getData(){
+        viewModel.fetchAPI { api in
+            if let api = api {
+                self.listViewModel = (api.entries.map({ViewListModel(apis: $0)}))
+                DispatchQueue.main.async {
+                    self.collection.reloadData()
+                }
+            }
+           
+        }
+    }
+
+    
+//    MARK: - REFRESH DATA
     
     @objc func refreshData(){
         
@@ -114,6 +104,8 @@ class ViewController: UIViewController,UISearchBarDelegate {
 // MARK: COLLECTION VIEW DELEGATE & DATA SOURCE
 
 extension ViewController: UICollectionViewDelegate,UICollectionViewDataSource {
+    
+    
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
        return listViewModel.count
     }
@@ -125,7 +117,6 @@ extension ViewController: UICollectionViewDelegate,UICollectionViewDataSource {
         cell.linkLabel.text = "Link: " + apiViewModel.link
         cell.descriptionLabel.text = "Description: " + apiViewModel.description
         cell.isHttpsLabel.text = "isHTTPS: " + String(apiViewModel.isHttps)
-        cell.backgroundView = imageView
         
         return cell
         
@@ -133,14 +124,17 @@ extension ViewController: UICollectionViewDelegate,UICollectionViewDataSource {
 //    MARK: ADD SEARCH BAR TO COLLECTION VIEW'S HEADER
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "header", for: indexPath)
-                header.addSubview(searchBar)
-                searchBar.translatesAutoresizingMaskIntoConstraints = false
-                searchBar.leftAnchor.constraint(equalTo: header.leftAnchor).isActive = true
-                searchBar.rightAnchor.constraint(equalTo: header.rightAnchor).isActive = true
-                searchBar.topAnchor.constraint(equalTo: header.topAnchor).isActive = true
-                searchBar.bottomAnchor.constraint(equalTo: header.bottomAnchor).isActive = true
-        
+        header.addSubview(searchBar)
         return header
     }
+    
+//    If the user scrolls the search bar also scrolls with it.
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        scrollView.addSubview(searchBar)
+        searchBar.frame = CGRect(x: 0, y:scrollView.contentOffset.y, width: view.frame.width, height: searchBar.frame.height)
+//        print(searchBar.frame)
+        
+    }
+
     
 }
